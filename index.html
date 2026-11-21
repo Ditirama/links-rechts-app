@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#2f5d8a">
+<title>Links &amp; Rechts Trainer</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  :root{
+    --bg:#f6f3ee; --card:#ffffff; --ink:#1f2a37; --muted:#6b7280;
+    --accent:#2f5d8a; --accent-2:#e8eef5; --ok:#1f8a4c; --bad:#c2410c;
+    --skin:#f2c9a5; --skin-d:#d9a27a; --line:#e5e1da;
+    --radius:18px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);
+       -webkit-tap-highlight-color:transparent}
+  #app{max-width:760px;margin:0 auto;padding:20px 16px 40px;min-height:100%}
+  h1{font-size:1.7rem;margin:.2em 0 .1em}
+  h2{font-size:1.3rem;margin:.2em 0 .6em}
+  p{line-height:1.5}
+  .muted{color:var(--muted)}
+  .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+  .back{background:none;border:none;font-size:1rem;color:var(--accent);cursor:pointer;padding:8px 0}
+  .stats{display:flex;gap:10px;margin:14px 0 18px;flex-wrap:wrap}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px;flex:1;min-width:120px}
+  .stat b{display:block;font-size:1.4rem}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;cursor:pointer;
+        text-align:left;font:inherit;color:inherit;transition:transform .1s,box-shadow .1s}
+  .card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.06)}
+  .card .ic{font-size:1.9rem}
+  .card h3{margin:.3em 0 .2em;font-size:1.08rem}
+  .card p{margin:0;font-size:.92rem;color:var(--muted)}
+  .stars{margin-top:8px;letter-spacing:2px;color:#d4a017}
+  .card.wide{grid-column:1/-1;background:var(--accent-2)}
+  .levels{display:grid;gap:12px}
+  .lvl{display:flex;gap:14px;align-items:center}
+  .lvl .num{font-size:1.6rem;font-weight:700;color:var(--accent);width:40px;text-align:center}
+  .btn{background:var(--accent);color:#fff;border:none;border-radius:14px;padding:14px 20px;font-size:1.05rem;
+       font-weight:600;cursor:pointer;font-family:inherit}
+  .btn.sec{background:var(--accent-2);color:var(--accent)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .progress{height:8px;background:var(--line);border-radius:8px;overflow:hidden;margin:6px 0 14px}
+  .progress i{display:block;height:100%;background:var(--accent);transition:width .3s}
+  .stage{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);min-height:300px;
+         display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;position:relative;overflow:hidden}
+  .prompt{font-size:1.1rem;font-weight:600;text-align:center;margin:0 0 12px}
+  .tag{display:inline-block;background:var(--accent-2);color:var(--accent);border-radius:999px;padding:4px 12px;font-size:.85rem;margin-bottom:8px}
+  .answers{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+  .ans{font-size:1.35rem;font-weight:700;padding:22px 10px;border-radius:18px;border:2px solid var(--line);
+       background:var(--card);color:var(--ink);cursor:pointer;font-family:inherit;user-select:none}
+  .ans:active{transform:scale(.98)}
+  .ans small{display:block;font-size:.75rem;font-weight:500;color:var(--muted);margin-top:4px}
+  .fb{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      background:rgba(255,255,255,.93);font-size:1.25rem;font-weight:700;text-align:center;padding:20px}
+  .fb.ok{color:var(--ok)} .fb.bad{color:var(--bad)}
+  .fb .big{font-size:3.2rem;line-height:1}
+  .fb .hint{font-size:.95rem;font-weight:500;color:var(--ink);max-width:420px;margin-top:10px}
+  .timer{position:absolute;left:0;top:0;height:5px;background:var(--bad);opacity:.7}
+  .bigarrow{font-size:7rem;line-height:1;font-weight:700}
+  .word{font-size:3.2rem;font-weight:800;letter-spacing:2px}
+  .lane{width:100%;display:flex;align-items:center;min-height:150px}
+  .lane.l{justify-content:flex-start} .lane.r{justify-content:flex-end} .lane.c{justify-content:center}
+  .lane > div{padding:0 6%}
+  svg.pic{width:min(260px,70vw);height:auto}
+  .result{text-align:center}
+  .result .score{font-size:3.4rem;font-weight:800;color:var(--accent)}
+  .tips{display:grid;gap:12px}
+  .tip{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+  .tip h3{margin:0 0 4px;font-size:1.05rem}
+  .tip p{margin:0}
+  .kbd{font-size:.85rem;color:var(--muted);text-align:center;margin-top:10px}
+  .replay{margin-top:10px}
+  footer{margin-top:28px;font-size:.85rem;color:var(--muted);text-align:center}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+"use strict";
+/* ---------- Hilfen ---------- */
+const $app = document.getElementById('app');
+const rand = a => a[Math.floor(Math.random()*a.length)];
+const other = s => s === 'L' ? 'R' : 'L';
+const WORD = {L:'links', R:'rechts'};
+const ROUND = 10;
+
+const store = {
+  get(){ try{ return JSON.parse(localStorage.getItem('lr-progress')) || {ex:{},days:[]}; }catch(e){ return {ex:{},days:[]}; } },
+  set(v){ try{ localStorage.setItem('lr-progress', JSON.stringify(v)); }catch(e){} }
+};
+
+function today(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function streak(days){
+  const set = new Set(days); let n=0; const d=new Date();
+  if(!set.has(today())) d.setDate(d.getDate()-1);
+  while(true){
+    const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    if(set.has(k)){ n++; d.setDate(d.getDate()-1); } else break;
+  }
+  return n;
+}
+
+/* ---------- Grafiken ---------- */
+/* Hand: wird immer mit dem Daumen links gezeichnet (= rechte Hand von hinten), sonst gespiegelt.
+   Finger zeigen nach oben. back = Handrücken mit Nägeln, palm = Handfläche mit Handlinien. */
+let svgId = 0;
+function fingerPath(cx, by, ty, w){
+  const r = w*0.45; // Fingerkuppe etwas schmaler als die Basis
+  return `M${cx-w/2} ${by} L${cx-r} ${ty+r} A${r} ${r} 0 0 1 ${cx+r} ${ty+r} L${cx+w/2} ${by} Z`;
+}
+function handSVG(thumbLeft, view, rot){
+  const id = 'skin'+(++svgId), back = view==='back';
+  const C = back
+    ? {a:'#f6d3b6', b:'#eebf9a', c:'#d99f78', line:'#b9805a', crease:'#a86f4c', nail:'#f8ded3'}
+    : {a:'#f9dcc6', b:'#f2c7a8', c:'#dfa985', line:'#b9805a', crease:'#b0714c', nail:'#f8ded3'};
+  // [Basis-x, Basis-y, Spitze-y, Breite, Neigung]: Zeigefinger, Mittelfinger, Ringfinger, kleiner Finger, Daumen
+  const F = [[75,114,38,19,-6],[97,112,25,20,-1],[118,113,33,18,4],[137,116,55,15,10],[70,160,90,24,-44]];
+  const parts = F.map(([x,by,ty,w,a]) => `<path d="${fingerPath(x,by,ty,w)}" transform="rotate(${a} ${x} ${by})"/>`).join('')
+    + `<ellipse cx="77" cy="150" rx="16" ry="27" transform="rotate(-25 77 150)"/>`
+    + `<path d="M63 106 Q60 150 79 182 L82 200 L122 200 L125 182 Q144 150 145 114 Q143 101 104 100 Q70 99 63 106Z"/>`;
+  const ln = (d, o=0.75, sw=1.4) => `<path d="${d}" fill="none" stroke="${C.crease}" stroke-width="${sw}" stroke-linecap="round" opacity="${o}"/>`;
+  const arc = (x, y, half, lift) => `M${x-half} ${y} Q${x} ${y-lift} ${x+half} ${y}`;
+
+  let det = '';
+  F.forEach(([x,by,ty,w,a], i) => {
+    const L = by-ty, thumb = i===4;
+    let g = '';
+    if(back){
+      const nw = w*0.62, nh = w*0.82, ny = ty + w*0.13;
+      g += `<rect x="${x-nw/2}" y="${ny}" width="${nw}" height="${nh}" rx="${nw*0.45}" fill="${C.nail}" stroke="${C.line}" stroke-width="1.1"/>`;
+      g += `<path d="M${x-nw*0.3} ${ny+nh-1.5} Q${x} ${ny+nh*0.62} ${x+nw*0.3} ${ny+nh-1.5}" fill="#fff" opacity=".55"/>`;
+      g += `<path d="M${x-nw*0.22} ${ny+3} L${x-nw*0.22} ${ny+nh*0.45}" stroke="#fff" stroke-width="1.4" stroke-linecap="round" opacity=".8"/>`;
+      const k = ty + L*(thumb ? 0.5 : 0.45);
+      g += ln(arc(x, k, w*0.27, 2.5)) + ln(arc(x, k+4, w*0.2, 1.5), 0.55);
+      if(!thumb) g += ln(arc(x, ty + L*0.27, w*0.2, 1.5), 0.4);
+    }else{
+      g += `<ellipse cx="${x}" cy="${ty+w*0.6}" rx="${w*0.27}" ry="${w*0.36}" fill="#fff" opacity=".22"/>`;
+      if(!thumb) g += ln(arc(x, ty + L*0.3, w*0.36, -1.5), 0.6);
+      const k = ty + L*(thumb ? 0.5 : 0.58);
+      g += ln(arc(x, k, w*0.4, -2)) + ln(arc(x, k+3.5, w*0.34, -1.5), 0.55);
+    }
+    det += `<g transform="rotate(${a} ${x} ${by})">${g}</g>`;
+  });
+  if(back){
+    [75,97,118,137].forEach(x => {
+      det += ln(arc(x, 113, 6, 4), 0.35, 1.2);
+      det += ln(`M${x} 122 L${100+(x-100)*0.35} 176`, 0.18, 2.2);
+    });
+  }else{
+    det += `<ellipse cx="80" cy="152" rx="13" ry="22" transform="rotate(-25 80 152)" fill="${C.c}" opacity=".18"/>`;
+    det += ln('M144 128 C128 120 106 124 86 115', 0.8, 1.8);   // Herzlinie
+    det += ln('M66 124 C88 131 112 135 136 147', 0.8, 1.8);    // Kopflinie
+    det += ln('M67 124 C86 140 93 160 91 184', 0.8, 1.8);      // Lebenslinie
+    det += ln('M86 190 Q102 193 118 190', 0.5) + ln('M88 196 Q102 198 116 196', 0.4);
+  }
+  const mirror = thumbLeft ? '' : 'translate(200,0) scale(-1,1)';
+  return `<svg class="pic" viewBox="0 0 200 210" role="img" aria-label="Hand" style="overflow:visible">
+    <defs><linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="25" y1="0" x2="150" y2="0">
+      <stop offset="0" stop-color="${C.c}"/><stop offset=".42" stop-color="${C.a}"/><stop offset=".78" stop-color="${C.b}"/><stop offset="1" stop-color="${C.c}"/>
+    </linearGradient></defs>
+    <g transform="rotate(${rot} 100 110)"><g transform="${mirror}">
+      <g fill="${C.line}" stroke="${C.line}" stroke-width="3.5" stroke-linejoin="round">${parts}</g>
+      <g fill="url(#${id})">${parts}</g>
+      ${det}
+    </g></g></svg>`;
+}
+
+function figureSVG(view, raisedScreenSide){
+  const arm = (side, raised) => {
+    const x = side==='L' ? 52 : 132;
+    return raised
+      ? `<rect x="${x}" y="8" width="16" height="74" rx="8" fill="#4f7cac"/><circle cx="${x+8}" cy="10" r="10" fill="var(--skin)"/>`
+      : `<rect x="${x}" y="76" width="16" height="70" rx="8" fill="#4f7cac"/><circle cx="${x+8}" cy="148" r="9" fill="var(--skin)"/>`;
+  };
+  const head = view==='front'
+    ? `<circle cx="100" cy="46" r="24" fill="var(--skin)"/>
+       <path d="M76 42 Q78 18 100 20 Q122 18 124 42 Q112 30 100 32 Q88 30 76 42Z" fill="#5b3a29"/>
+       <circle cx="91" cy="48" r="3" fill="#1f2a37"/><circle cx="109" cy="48" r="3" fill="#1f2a37"/>
+       <path d="M90 58 Q100 66 110 58" fill="none" stroke="#1f2a37" stroke-width="2.5" stroke-linecap="round"/>`
+    : `<circle cx="100" cy="46" r="24" fill="#5b3a29"/><rect x="92" y="66" width="16" height="8" fill="var(--skin)"/>`;
+  const shirt = view==='front'
+    ? `<line x1="100" y1="80" x2="100" y2="140" stroke="#3b6390" stroke-width="2"/><circle cx="100" cy="92" r="2.5" fill="#fff"/><circle cx="100" cy="108" r="2.5" fill="#fff"/>`
+    : `<path d="M82 80 Q100 92 118 80" fill="none" stroke="#3b6390" stroke-width="2"/>`;
+  return `<svg class="pic" viewBox="0 0 200 230" role="img" aria-label="Person">
+    ${arm('L', raisedScreenSide==='L')}${arm('R', raisedScreenSide==='R')}
+    <rect x="70" y="72" width="60" height="82" rx="14" fill="#4f7cac"/>${shirt}
+    <rect x="76" y="150" width="20" height="72" rx="9" fill="#374151"/><rect x="104" y="150" width="20" height="72" rx="9" fill="#374151"/>
+    ${head}</svg>`;
+}
+
+function roadSVG(h, d){
+  const c=120, L=88;
+  const s=[c-h[0]*L, c-h[1]*L], e=[c+d[0]*L, c+d[1]*L];
+  const ang = Math.atan2(h[0], -h[1]) * 180/Math.PI; // 0 = nach oben
+  const car=[s[0]+h[0]*16, s[1]+h[1]*16];
+  return `<svg class="pic" viewBox="0 0 240 240" role="img" aria-label="Weg">
+    <rect x="0" y="0" width="240" height="240" rx="16" fill="#e7efe0"/>
+    <polyline points="${s} ${c},${c} ${e}" fill="none" stroke="#9ca3af" stroke-width="40" stroke-linejoin="round" stroke-linecap="round"/>
+    <polyline points="${s} ${c},${c} ${e}" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="10 10" stroke-linejoin="round"/>
+    <g transform="translate(${e}) "><rect x="-2" y="-26" width="4" height="28" fill="#374151"/><path d="M2 -26 L20 -20 L2 -14Z" fill="#c2410c"/></g>
+    <g transform="translate(${car}) rotate(${ang})">
+      <rect x="-11" y="-16" width="22" height="32" rx="7" fill="#2f5d8a"/>
+      <rect x="-8" y="-12" width="16" height="9" rx="3" fill="#cfe0f1"/>
+      <path d="M0 -30 L8 -20 L-8 -20Z" fill="#2f5d8a"/>
+    </g></svg>`;
+}
+
+/* ---------- Ton ---------- */
+let audioCtx = null;
+function beep(side, dur){
+  try{
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtx.state==='suspended') audioCtx.resume();
+    const t = audioCtx.currentTime + 0.02;
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.frequency.value = 520; o.type='sine';
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.4, t+0.02); g.gain.setValueAtTime(0.4, t+dur-0.05); g.gain.linearRampToValueAtTime(0, t+dur);
+    let out = g;
+    if(audioCtx.createStereoPanner){ const p=audioCtx.createStereoPanner(); p.pan.value = side==='L'?-1:1; g.connect(p); out=p; }
+    o.connect(g); out.connect(audioCtx.destination); o.start(t); o.stop(t+dur+0.02);
+  }catch(e){}
+}
+
+/* ---------- Sprache ---------- */
+const canSpeak = () => 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+let deVoice = null;
+function pickVoice(){
+  try{ const v = speechSynthesis.getVoices(); deVoice = v.find(x=>/^de([-_]|$)/i.test(x.lang)) || null; }catch(e){}
+}
+if(canSpeak()){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function say(text, onEnd){
+  if(!canSpeak()){ if(onEnd) onEnd(); return; }
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'de-DE'; if(deVoice) u.voice = deVoice; u.rate = 0.9;
+    if(onEnd){ u.onend = onEnd; u.onerror = onEnd; }
+    speechSynthesis.speak(u);
+  }catch(e){ if(onEnd) onEnd(); }
+}
+function hush(){ try{ if(canSpeak()) speechSynthesis.cancel(); }catch(e){} }
+
+/* Sätze für die Stimme: [Anfang, Endung, Rest]. Aus "link"/"recht" + Endung wird das passende Wort. */
+const STEM = {L:'link', R:'recht'};
+const SAY_HAND = [['Heb die ','e',' Hand.'], ['Winke mit der ','en',' Hand.'], ['Klatsch mit der ','en',' Hand auf dein Bein.']];
+const SAY_BODY = [['Heb den ','en',' Fuß.'], ['Stampf mit dem ','en',' Fuß.'], ['Fass dein ','es',' Ohr an.'],
+  ['Mach dein ','es',' Auge zu.'], ['Zeig auf dein ','es',' Knie.'], ['Klopf auf deine ','e',' Schulter.']];
+const sentence = (t, side) => t[0] + STEM[side] + t[1] + t[2];
+
+/* ---------- Übungen ---------- */
+const EX = {
+  pfeil:{ icon:'➡️', name:'Pfeil-Reaktion', desc:'Ein Pfeil erscheint. Tippe so schnell wie möglich die Richtung.',
+    levels:['Pfeil in der Mitte, ohne Zeitdruck','Mit Zeitlimit (2 Sekunden)','Pfeil steht oft auf der falschen Seite, 1,5 Sekunden'],
+    gen(lv){
+      const a=rand(['L','R']); const pos = lv===3 ? rand(['L','R']) : 'c';
+      return { answer:a, prompt:'In welche Richtung zeigt der Pfeil?', limit: lv===2?2000: lv===3?1500:0,
+        html:`<div class="lane ${pos==='c'?'c':pos.toLowerCase()}"><div class="bigarrow">${a==='L'?'←':'→'}</div></div>`,
+        hint: lv===3 ? 'Achte nur auf die Spitze des Pfeils, nicht darauf, wo er steht.' : '' };
+    }},
+  wort:{ icon:'🔤', name:'Wort-Übung', desc:'Lies das Wort. Es kann auf der falschen Seite stehen.',
+    levels:['Wort in der Mitte','Wort steht links oder rechts, egal was es sagt','Mit Pfeil, der ablenkt, 2,5 Sekunden'],
+    gen(lv){
+      const a=rand(['L','R']); const pos = lv===1 ? 'c' : rand(['L','R']);
+      const distract = lv===3 ? `<div style="font-size:2.4rem;margin-top:6px;color:var(--muted)">${rand(['←','→'])}</div>` : '';
+      return { answer:a, prompt:'Was steht da?', limit: lv===3?2500:0,
+        html:`<div class="lane ${pos==='c'?'c':pos.toLowerCase()}"><div style="text-align:center"><div class="word">${WORD[a].toUpperCase()}</div>${distract}</div></div>`,
+        hint: lv>1 ? 'Nur das Wort zählt, nicht die Stelle, an der es steht.' : '' };
+    }},
+  hand:{ icon:'✋', name:'Hände erkennen', desc:'Ist das eine linke oder eine rechte Hand?',
+    levels:['Handrücken, so wie du deine eigene Hand siehst','Handrücken oder Handfläche (beschriftet)','Gedreht und ohne Beschriftung'],
+    gen(lv){
+      const hand=rand(['L','R']); const view = lv===1 ? 'back' : rand(['back','palm']);
+      const rot = lv===3 ? rand([0,90,180,270]) : 0;
+      const thumbLeft = (hand==='R' && view==='back') || (hand==='L' && view==='palm');
+      const tag = lv<3 ? `<div class="tag">${view==='back'?'Handrücken (Fingernägel sichtbar)':'Handfläche (Handlinien sichtbar)'}</div>` : '';
+      return { answer:hand, prompt:'Linke oder rechte Hand?',
+        html:`${tag}${handSVG(thumbLeft, view, rot)}`,
+        hint: view==='back'
+          ? 'Handrücken: Bei der rechten Hand ist der Daumen links. Halte deine eigene Hand zum Vergleich so hin.'
+          : 'Handfläche: Bei der rechten Hand ist der Daumen rechts. Dreh deine Hand um und vergleiche.' };
+    }},
+  spiegel:{ icon:'🧍', name:'Spiegel-Perspektive', desc:'Welchen Arm hebt die Person, aus ihrer eigenen Sicht?',
+    levels:['Person steht mit dem Rücken zu dir','Person schaut dich an (gespiegelt)','Gemischt, ohne Hinweis'],
+    gen(lv){
+      const view = lv===1 ? 'back' : lv===2 ? 'front' : rand(['back','front']);
+      const own = rand(['L','R']); const screen = view==='back' ? own : other(own);
+      const tag = lv<3 ? `<div class="tag">${view==='back'?'von hinten':'von vorne'}</div>` : '';
+      return { answer:own, prompt:'Welchen Arm hebt die Person? (aus ihrer Sicht)',
+        html:`${tag}${figureSVG(view, screen)}`,
+        hint: view==='front'
+          ? 'Die Person schaut dich an. Ihre rechte Seite ist auf deiner linken Seite. Stell dich in Gedanken neben sie.'
+          : 'Von hinten siehst du die Person genauso wie dich selbst: ihre linke Seite ist auch deine linke Seite.' };
+    }},
+  weg:{ icon:'🚗', name:'Wegbeschreibung', desc:'Biegt das Auto aus seiner Sicht links oder rechts ab?',
+    levels:['Auto fährt nach oben (wie du)','Auto fährt nach oben oder unten','Auto fährt in jede Richtung'],
+    gen(lv){
+      const D={u:[0,-1],d:[0,1],l:[-1,0],r:[1,0]};
+      const h = lv===1 ? D.u : lv===2 ? rand([D.u,D.d]) : rand([D.u,D.d,D.l,D.r]);
+      const turn=rand(['L','R']);
+      const d = turn==='R' ? [-h[1], h[0]] : [h[1], -h[0]];
+      return { answer:turn, prompt:'Wohin biegt das Auto ab? (aus Sicht des Fahrers)',
+        html: roadSVG(h,d),
+        hint:'Stell dir vor, du sitzt im Auto. Drehe das Bild im Kopf, bis das Auto nach oben fährt.' };
+    }},
+  hoeren:{ icon:'🎧', name:'Hör-Übung', desc:'Ein Ton kommt von links oder rechts. Bitte Kopfhörer benutzen.',
+    levels:['Langer Ton','Kurzer Ton','Kurzer Ton und ein Pfeil, der ablenkt'],
+    gen(lv){
+      const a=rand(['L','R']); const dur = lv===1?0.8:0.25;
+      const distract = lv===3 ? `<div class="bigarrow" style="color:var(--muted)">${rand(['←','→'])}</div>` : '<div style="font-size:4rem">🎧</div>';
+      return { answer:a, prompt:'Von welcher Seite kam der Ton?', audio:{side:a,dur},
+        html:`${distract}<button class="btn sec replay" data-replay>🔊 Nochmal hören</button>`,
+        hint: lv===3 ? 'Hör nur auf den Ton und ignoriere den Pfeil.' : 'Prüfe, ob die Kopfhörer richtig herum sitzen (L und R).' };
+    }},
+  stimme:{ icon:'🗣️', name:'Hör auf die Stimme', desc:'Eine Stimme sagt dir, was du tun sollst. Mach es nach und tippe die Seite.',
+    levels:['Heb die linke oder die rechte Hand','Hand, Fuß, Ohr, Auge, Knie oder Schulter','Pass gut auf: Manchmal heißt es „nicht“'],
+    gen(lv){
+      const a = rand(['L','R']);
+      let text, neg = false;
+      if(lv===1) text = sentence(SAY_HAND[0], a);
+      else if(lv===3 && Math.random()<0.4){ neg = true; text = `Heb nicht die ${STEM[other(a)]}e Hand, sondern die andere.`; }
+      else text = sentence(rand(lv===2 ? [...SAY_HAND, ...SAY_BODY] : SAY_BODY), a);
+      const shown = canSpeak() ? '' : `<p style="font-size:1.4rem;font-weight:700;text-align:center">„${text}“</p>`;
+      const distract = lv===3 ? `<div class="bigarrow" style="color:var(--muted)">${rand(['←','→'])}</div>` : '<div style="font-size:4rem">🗣️</div>';
+      return { answer:a, prompt:'Mach es nach. Welche Seite hast du benutzt?', speak:text,
+        html:`${distract}${shown}${canSpeak()?'<button class="btn sec replay" data-replay>🔊 Nochmal hören</button>':''}`,
+        hint: `Die Stimme hat gesagt: „${text}“` + (neg ? ' Bei „nicht“ nimmst du die andere Seite.' : ' Tipp: Deine Schreibhand hilft dir beim Merken.') };
+    }}
+};
+const MIX_KEYS = ['pfeil','wort','hand','spiegel','weg'];
+EX.mix = { icon:'🎲', name:'Gemischtes Training', desc:'Alle Übungen durcheinander. Ideal für jeden Tag.',
+  levels:['Leicht','Mittel','Schwer'],
+  gen(lv){ const k=rand(MIX_KEYS); const t=EX[k].gen(lv); t.limit=0; return t; } };
+
+/* ---------- Ansichten ---------- */
+let S = null; // laufende Runde
+let keyHandler = null;
+
+function stars(key){
+  const p = store.get().ex[key] || {};
+  return [1,2,3].map(l => (p[l] && p[l].best>=9) ? '★' : '☆').join('');
+}
+
+function home(){
+  stopRound();
+  const p = store.get();
+  const rounds = Object.values(p.ex).reduce((s,e)=>s+Object.values(e).reduce((a,b)=>a+(b.rounds||0),0),0);
+  const order=['mix','pfeil','wort','hand','spiegel','weg','hoeren','stimme'];
+  $app.innerHTML = `
+    <h1>Links &amp; Rechts Trainer</h1>
+    <p class="muted" style="margin:0">Kurze Übungen, um links und rechts sicher zu unterscheiden. 5 Minuten am Tag reichen.</p>
+    <div class="stats">
+      <div class="stat"><b>${rounds}</b>Runden gespielt</div>
+      <div class="stat"><b>${streak(p.days)}</b>Tage in Folge</div>
+    </div>
+    <div class="grid">
+      ${order.map(k=>`<button class="card ${k==='mix'?'wide':''}" data-ex="${k}">
+        <div class="ic">${EX[k].icon}</div><h3>${EX[k].name}</h3><p>${EX[k].desc}</p><div class="stars" title="Stern = mindestens 9 von 10 auf dieser Stufe">${stars(k)}</div></button>`).join('')}
+      <button class="card wide" data-tips><div class="ic">💡</div><h3>Eselsbrücken</h3><p>Einfache Tricks, die im Alltag helfen.</p></button>
+    </div>
+    <footer>Dein Fortschritt wird nur auf diesem Gerät gespeichert.</footer>`;
+  $app.querySelectorAll('[data-ex]').forEach(b=>b.onclick=()=>levelSelect(b.dataset.ex));
+  $app.querySelector('[data-tips]').onclick=tips;
+}
+
+function levelSelect(key){
+  const ex=EX[key]; const p=(store.get().ex[key])||{};
+  $app.innerHTML = `
+    <div class="top"><button class="back" data-home>← Übersicht</button></div>
+    <h2>${ex.icon} ${ex.name}</h2><p class="muted">${ex.desc}</p>
+    <div class="levels">
+      ${ex.levels.map((t,i)=>`<button class="card lvl" data-lv="${i+1}"><div class="num">${i+1}</div>
+        <div><h3>Stufe ${i+1}</h3><p>${t}</p>${p[i+1]?`<p style="margin-top:4px">Bestes Ergebnis: ${p[i+1].best}/10</p>`:''}</div></button>`).join('')}
+    </div>`;
+  $app.querySelector('[data-home]').onclick=home;
+  $app.querySelectorAll('[data-lv]').forEach(b=>b.onclick=()=>startRound(key, +b.dataset.lv));
+}
+
+function tips(){
+  $app.innerHTML = `
+    <div class="top"><button class="back" data-home>← Übersicht</button></div>
+    <h2>💡 Eselsbrücken</h2>
+    <div class="tips">
+      <div class="tip"><h3>Der L-Trick</h3><p>Streck beide Hände mit dem Handrücken nach vorne aus, Daumen zur Seite, Zeigefinger nach oben. Die Hand, die ein richtiges „L“ bildet, ist die linke.</p>
+        <div style="text-align:center">${handSVG(false,'back',0).replace('class="pic"','class="pic" style="width:120px"')}</div></div>
+      <div class="tip"><h3>Die Schreibhand</h3><p>Wenn du mit rechts schreibst: Die Schreibhand ist rechts. Wenn du mit links schreibst, gilt es genau andersherum.</p></div>
+      <div class="tip"><h3>Ein festes Merkzeichen</h3><p>Trage eine Uhr, einen Ring oder ein Armband immer an derselben Hand. Dann musst du nur kurz hinschauen.</p></div>
+      <div class="tip"><h3>Jemand steht dir gegenüber</h3><p>Seine rechte Hand ist auf deiner linken Seite. Stell dich in Gedanken neben die Person und schau in dieselbe Richtung.</p></div>
+      <div class="tip"><h3>Auf der Karte</h3><p>Dreh die Karte (oder das Bild im Kopf) so, dass du in Fahrtrichtung schaust. Dann stimmt links und rechts wieder.</p></div>
+      <div class="tip"><h3>Regelmäßig statt lange</h3><p>Lieber jeden Tag 5 Minuten üben als einmal pro Woche eine Stunde. Erst sicher werden, dann schneller werden.</p></div>
+    </div>`;
+  $app.querySelector('[data-home]').onclick=home;
+}
+
+/* ---------- Runde ---------- */
+function startRound(key, lv){
+  stopRound();
+  S = {key, lv, i:0, correct:0, times:[], cur:null, t0:0, timer:null, locked:false};
+  keyHandler = e => {
+    if(!S || S.locked) return;
+    if(e.key==='ArrowLeft'){ e.preventDefault(); answer('L'); }
+    if(e.key==='ArrowRight'){ e.preventDefault(); answer('R'); }
+  };
+  document.addEventListener('keydown', keyHandler);
+  if(key==='hoeren') beep('L',0.01); // Audio im Klick freischalten
+  if(key==='stimme') say(' ');        // Sprachausgabe im Klick freischalten (Handy)
+  nextTask();
+}
+
+function stopRound(){
+  if(S && S.timer) clearTimeout(S.timer);
+  if(keyHandler) document.removeEventListener('keydown', keyHandler);
+  if(S && S.key==='stimme') hush();
+  keyHandler=null; S=null;
+}
+
+function nextTask(){
+  if(S.i >= ROUND) return finish();
+  const t = EX[S.key].gen(S.lv); S.cur=t; S.locked=false;
+  $app.innerHTML = `
+    <div class="top"><button class="back" data-home>← Abbrechen</button><span class="muted">Stufe ${S.lv} · Aufgabe ${S.i+1}/${ROUND}</span></div>
+    <div class="progress"><i style="width:${S.i/ROUND*100}%"></i></div>
+    <div class="stage" id="stage">
+      ${t.limit?'<div class="timer" id="timer" style="width:100%"></div>':''}
+      <p class="prompt">${t.prompt}</p>${t.html}
+    </div>
+    <div class="answers">
+      <button class="ans" data-a="L">Links<small>← Pfeiltaste</small></button>
+      <button class="ans" data-a="R">Rechts<small>Pfeiltaste →</small></button>
+    </div>`;
+  $app.querySelector('[data-home]').onclick=home;
+  $app.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>answer(b.dataset.a));
+  const rp=$app.querySelector('[data-replay]');
+  if(t.audio){
+    if(rp) rp.onclick=()=>beep(t.audio.side,t.audio.dur);
+    setTimeout(()=>{ if(S && S.cur===t){ beep(t.audio.side,t.audio.dur); S.t0=performance.now(); } }, 400);
+  }
+  if(t.speak){
+    if(rp) rp.onclick=()=>say(t.speak);
+    setTimeout(()=>{ if(S && S.cur===t) say(t.speak, ()=>{ if(S && S.cur===t && !S.locked) S.t0=performance.now(); }); }, 350);
+  }
+  S.t0 = performance.now();
+  if(t.limit){
+    const bar=document.getElementById('timer');
+    requestAnimationFrame(()=>{ bar.style.transition=`width ${t.limit}ms linear`; bar.style.width='0%'; });
+    S.timer=setTimeout(()=>answer(null), t.limit);
+  }
+}
+
+function answer(a){
+  if(!S || S.locked) return;
+  S.locked=true; if(S.timer){ clearTimeout(S.timer); S.timer=null; }
+  const t=S.cur, ok = a===t.answer, ms=performance.now()-S.t0;
+  if(ok){ S.correct++; S.times.push(ms); }
+  S.i++;
+  const stage=document.getElementById('stage');
+  const fb=document.createElement('div');
+  fb.className='fb '+(ok?'ok':'bad');
+  fb.innerHTML = ok
+    ? `<div class="big">✓</div>Richtig!`
+    : `<div class="big">✗</div>${a===null?'Zu langsam.':'Leider falsch.'} Richtig ist: ${t.answer==='L'?'Links':'Rechts'}${t.hint?`<div class="hint">${t.hint}</div>`:''}`;
+  stage.appendChild(fb);
+  setTimeout(()=>{ if(S) nextTask(); }, ok?650:2300);
+}
+
+function finish(){
+  const {key,lv,correct,times}=S;
+  const avg = times.length ? Math.round(times.reduce((a,b)=>a+b,0)/times.length) : 0;
+  const p=store.get(); p.ex[key]=p.ex[key]||{}; const e=p.ex[key][lv]||{best:0,rounds:0,bestMs:0};
+  e.rounds++; if(correct>e.best) e.best=correct;
+  if(correct>=8 && avg && (!e.bestMs || avg<e.bestMs)) e.bestMs=avg;
+  p.ex[key][lv]=e; if(!p.days.includes(today())) p.days.push(today()); p.days=p.days.slice(-60); store.set(p);
+  stopRound();
+  const msg = correct===10 ? 'Perfekt! Probier die nächste Stufe.' : correct>=8 ? 'Sehr gut! Noch eine Runde, dann bist du sicher.' : correct>=5 ? 'Gut gemacht. Übung macht den Unterschied.' : 'Kein Problem, das ist am Anfang normal. Schau dir die Eselsbrücken an.';
+  $app.innerHTML = `
+    <div class="top"><button class="back" data-home>← Übersicht</button></div>
+    <div class="stage result">
+      <div class="score">${correct}/10</div>
+      <p>${msg}</p>
+      ${avg?`<p class="muted">Durchschnittliche Zeit bei richtigen Antworten: ${(avg/1000).toFixed(2).replace('.',',')} Sekunden</p>`:''}
+    </div>
+    <div class="row" style="justify-content:center">
+      <button class="btn" data-again>Nochmal</button>
+      ${lv<3?`<button class="btn sec" data-next>Stufe ${lv+1}</button>`:''}
+      <button class="btn sec" data-home2>Übersicht</button>
+    </div>`;
+  $app.querySelector('[data-home]').onclick=home;
+  $app.querySelector('[data-home2]').onclick=home;
+  $app.querySelector('[data-again]').onclick=()=>startRound(key,lv);
+  const n=$app.querySelector('[data-next]'); if(n) n.onclick=()=>startRound(key,lv+1);
+}
+
+home();
+if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
